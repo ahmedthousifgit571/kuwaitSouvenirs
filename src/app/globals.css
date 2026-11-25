@@ -1,0 +1,236 @@
+@import "tailwindcss";
+@import "lenis/dist/lenis.css";
+
+:root {
+  --red: #cf1830;
+  --blue: #6db1f0;
+  --grey: #f8f4f4;
+  --ink: #161616;
+  --white: #ffffff;
+  --gutter: 20px;
+  /* The two-line wordmark is 1400 x 342 units and runs between the gutters. */
+  --wm-h: calc((100vw - var(--gutter) * 2) * 342 / 1400);
+}
+
+@theme inline {
+  --color-red: var(--red);
+  --color-blue: var(--blue);
+  --color-grey: var(--grey);
+  --color-ink: var(--ink);
+  --font-sans: var(--font-vazir), system-ui, sans-serif;
+  --font-mono: var(--font-fira), ui-monospace, monospace;
+  --font-serif: var(--font-italic), Georgia, serif;
+}
+
+@custom-variant touch {
+  @media (hover: none), (pointer: coarse) {
+    @slot;
+  }
+}
+
+/* A phone on its side: too short for the full-width wordmark and the tall slides. */
+@custom-variant short {
+  @media (orientation: landscape) and (max-height: 34.99rem) {
+    @slot;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 34.99rem) {
+  :root {
+    /* The wordmark is capped at 30% of the screen height here (see Nav). */
+    --wm-h: calc(min(100vw - var(--gutter) * 2, 30svh * 1400 / 342) * 342 / 1400);
+  }
+}
+
+html {
+  background: var(--white);
+  color: var(--red);
+  -webkit-text-size-adjust: 100%;
+  overflow-anchor: none;
+}
+
+body {
+  background: var(--white);
+  color: var(--red);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.2;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: var(--red);
+  color: var(--white);
+}
+
+@layer components {
+  /* Serif italic accent: the second voice in every two-tone heading. */
+  .it {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+  }
+
+  .label {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.2;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+
+  .h1 {
+    font-size: clamp(34px, 3.62vw, 66px);
+    line-height: 1;
+    letter-spacing: -0.035em;
+    font-weight: 400;
+  }
+
+  /* Section statements: 60px at 1440 wide, as on the reference. */
+  .h2 {
+    font-size: clamp(34px, 4.17vw, 76px);
+    line-height: 1;
+    letter-spacing: -0.035em;
+    font-weight: 400;
+  }
+
+  .h2 .it {
+    font-size: 1.08em;
+    line-height: 0.9;
+    letter-spacing: -0.02em;
+  }
+
+  /* Shipping-label perforation: a row of semicircle bites along one edge. */
+  .perf-bottom {
+    -webkit-mask:
+      radial-gradient(circle 4px at 7px 100%, #0000 96%, #000) bottom / 14px 8px repeat-x,
+      linear-gradient(#000 0 0) top / 100% calc(100% - 7px) no-repeat;
+    mask:
+      radial-gradient(circle 4px at 7px 100%, #0000 96%, #000) bottom / 14px 8px repeat-x,
+      linear-gradient(#000 0 0) top / 100% calc(100% - 7px) no-repeat;
+  }
+  .perf-top {
+    -webkit-mask:
+      radial-gradient(circle 4px at 7px 0, #0000 96%, #000) top / 14px 8px repeat-x,
+      linear-gradient(#000 0 0) bottom / 100% calc(100% - 7px) no-repeat;
+    mask:
+      radial-gradient(circle 4px at 7px 0, #0000 96%, #000) top / 14px 8px repeat-x,
+      linear-gradient(#000 0 0) bottom / 100% calc(100% - 7px) no-repeat;
+  }
+
+  /* Tear the stub: it hangs from its top-left corner and the order button shows. */
+  .pack-stub {
+    transition: transform 0.6s cubic-bezier(0.2, 0.9, 0.25, 1);
+  }
+  .pack.is-torn .pack-stub {
+    transform: translate(2px, 10px) rotate(5deg);
+  }
+  .pack-barcode,
+  .pack-cta {
+    transition: opacity 0.3s ease;
+  }
+  .pack-cta {
+    opacity: 0;
+    pointer-events: none;
+  }
+  .pack.is-torn .pack-cta {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .pack.is-torn .pack-barcode {
+    opacity: 0;
+  }
+
+  .mabkhara-smoke path {
+    animation: smoke 3.6s ease-in-out infinite;
+  }
+  .mabkhara-smoke path:nth-child(2) {
+    animation-delay: -1.2s;
+  }
+  .mabkhara-smoke path:nth-child(3) {
+    animation-delay: -2.4s;
+  }
+
+  .h1 .it {
+    line-height: 0.9;
+    letter-spacing: -0.02em;
+    font-size: 1.08em;
+  }
+
+  /* Rolling loader digits fade in and out at the column edges. */
+  .loader-col::before,
+  .loader-col::after {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    height: 6px;
+    z-index: 2;
+    pointer-events: none;
+  }
+  .loader-col::before {
+    top: 0;
+    background: linear-gradient(to bottom, var(--red), transparent);
+  }
+  .loader-col::after {
+    bottom: 0;
+    background: linear-gradient(to top, var(--red), transparent);
+  }
+
+  /* Diamond that ticks round next to the status line, as on the reference. */
+  .pulse-dot {
+    width: 7px;
+    height: 7px;
+    background: currentColor;
+    animation: pulse-dot 2s linear infinite;
+  }
+}
+
+@keyframes caret {
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes smoke {
+  0%,
+  100% {
+    transform: translateY(4px);
+    opacity: 0.25;
+  }
+  50% {
+    transform: translateY(-6px);
+    opacity: 0.9;
+  }
+}
+
+@keyframes pulse-dot {
+  0% {
+    transform: rotate(45deg) scale(1.1);
+    box-shadow: 0 0 0 0 rgb(207 24 48 / 0.55);
+  }
+  50% {
+    transform: rotate(90deg) scale(1.2);
+    box-shadow: 0 0 0 4px rgb(0 0 0 / 0);
+  }
+  100% {
+    transform: rotate(135deg) scale(1.1);
+    box-shadow: 0 0 0 0 rgb(0 0 0 / 0);
+  }
+}
+
+/* Loader is skipped (repeat visit or reduced motion): the inline head script sets this before paint. */
+html[data-intro="skip"] .loader {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}
